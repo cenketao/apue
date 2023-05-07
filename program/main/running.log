@@ -1,0 +1,41 @@
+a.out : 16:06:17 [INFO ] socket connected!
+a.out : 16:09:38 [ERROR] socket failure!
+a.out : 16:09:39 [WARN ] sockfd disconnected!
+a.out : 16:09:39 [WARN ] Breaking and write to database!
+a.out : 16:09:39 [INFO ] write to database successfully!
+a.out : 16:09:39 [ERROR] write to server failure!
+a.out : 16:09:39 [ERROR] read data from server by sockfd[-2] failure!
+a.out : 16:09:49 [WARN ] sockfd disconnected!
+a.out : 16:09:49 [WARN ] Breaking and write to database!
+a.out : 16:09:49 [INFO ] write to database successfully!
+a.out : 16:09:49 [ERROR] write to server failure!
+a.out : 16:09:49 [ERROR] read data from server by sockfd[-2] failure!
+a.out : 16:09:59 [WARN ] sockfd disconnected!
+a.out : 16:09:59 [WARN ] Breaking and write to database!
+a.out : 16:09:59 [INFO ] write to database successfully!
+a.out : 16:09:59 [ERROR] write to server failure!
+a.out : 16:09:59 [ERROR] read data from server by sockfd[-2] failure!
+a.out : 16:16:54 [INFO ] socket connected!
+a.out : 16:16:54 [INFO ] database write to server successfully!
+a.out : 16:16:54 [INFO ] DELETE sqlite database successfully!
+a.out : 16:16:54 [INFO ] socket write to server successfully! 
+a.out : 16:17:04 [INFO ] socket connected!
+a.out : 16:17:04 [INFO ] database write to server successfully!
+a.out : 16:17:04 [INFO ] DELETE sqlite database successfully!
+a.out : 16:17:04 [INFO ] socket write to server successfully! 
+a.out : 16:17:14 [WARN ] sockfd disconnected!
+a.out : 16:17:14 [WARN ] Breaking and write to database!
+a.out : 16:17:14 [INFO ] write to database successfully!
+a.out : 16:17:24 [WARN ] sockfd disconnected!
+a.out : 16:17:24 [WARN ] Breaking and write to database!
+a.out : 16:17:24 [INFO ] write to database successfully!
+a.out : 16:17:34 [WARN ] sockfd disconnected!
+a.out : 16:17:34 [WARN ] Breaking and write to database!
+a.out : 16:17:34 [INFO ] write to database successfully!
+a.out : 17:08:51 [INFO ] socket connected!
+a.out : 17:08:51 [INFO ] database write to server successfully!
+a.out : 17:08:51 [INFO ] DELETE sqlite database successfully!
+a.out : 17:08:51 [INFO ] socket write to server successfully! 
+a.out : 17:09:01 [WARN ] sockfd disconnected!
+a.out : 17:09:01 [WARN ] Breaking and write to database!
+a.out : 17:09:01 [INFO ] write to database successfully!
