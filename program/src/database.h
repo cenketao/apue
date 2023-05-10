@@ -29,5 +29,6 @@ int sqlite_delect(char *dbname);
 
 int sqlite_close(void);
 
+int database_check_data(char *dbname);
 
 #endif

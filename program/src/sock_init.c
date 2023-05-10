@@ -17,10 +17,12 @@
 #include<errno.h>
 #include<string.h>
 #include<unistd.h>
-#include <stdlib.h>
+#include<stdlib.h>
 #include<getopt.h>
-#include <netdb.h>
-
+#include<netdb.h>
+#include"logger.h"
+#include <libgen.h>
+#include <linux/tcp.h>
 
 int sock_init(char *servip,char *domain,int port)
 {
@@ -60,7 +62,7 @@ int sock_init(char *servip,char *domain,int port)
         sockfd =socket(AF_INET,SOCK_STREAM,0);
         if(sockfd<0)
         {
-           printf("creat socket failure:%s\n",strerror(errno));
+           log_error("creat socket failure:%s!",strerror(errno));
            rv = -1;
            goto CleanUp;
         }
@@ -72,7 +74,7 @@ int sock_init(char *servip,char *domain,int port)
         rv = connect(sockfd,(struct sockaddr *)&servaddr,sizeof(servaddr));
         if(rv<0)
         {
-            printf("connect to server[%s:%d]failure :%s\n",servip,port,strerror(errno));
+            log_error("connect to server[%s:%d]failure :%s!",servip,port,strerror(errno));
             rv = -2;
             goto CleanUp;
         }
@@ -86,3 +88,33 @@ CleanUp:
         return rv;
 }
 
+int get_sock_state(int sockfd)
+{
+	     struct tcp_info  info;
+		 int              len = sizeof(info);
+		 int              rv = -1;
+		 if(sockfd<0)
+		 {
+              printf("the sockfd argument incorrect!\n");
+			  return -1;
+		 }
+		 memset(&info,0,sizeof(info));
+
+         rv = getsockopt(sockfd,IPPROTO_TCP,TCP_INFO,&info,(socklen_t*)&len);
+         if(rv<0)
+		 {
+             log_error("get socket state failure!");
+			 return -2;
+		 }
+		 if((info.tcpi_state ==1))
+                {
+                  log_info("socket[%d] connected!",sockfd);
+                  return 1;
+                }
+                else
+                {
+                  log_warn("sockfd[%d] disconnected!",sockfd);
+				  return 0;
+                  
+                }
+}

@@ -15,6 +15,7 @@
 #include<stdio.h>
 #include <stdlib.h>
 #include<sqlite3.h>
+#include"logger.h"
  
 int callback(void *NotUsed, int argc, char **argv, char **azColName)
 {
@@ -34,7 +35,7 @@ int sqlite_init(char *db_name)
          char sql[128];
          if(!db_name)
          {
-          printf("ERROR:Invalid input arguments\n");
+          log_error("ERROR:Invalid input arguments\n");
                   return -1;
          }
 
@@ -42,10 +43,10 @@ int sqlite_init(char *db_name)
      rc = sqlite3_open(db_name, &db);
      if( rc )
          {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        log_error( "Can't open database: %s\n", sqlite3_errmsg(db));
         return -2;
      }
-      memset(sql,0,sizeof(sql));
+          memset(sql,0,sizeof(sql));
           snprintf(sql,sizeof(sql),"CREATE TABLE TEMPERATURE(ID INTEGER PRIMARY KEY AUTOINCREMENT,NAME CHAR(20),TEMPERATURE CHAR(20),TIME CHAR(20));");
      /* Create SQL statement */
 
@@ -58,7 +59,7 @@ int sqlite_init(char *db_name)
      }
      else
      {
-        fprintf(stdout, "Table created successfully\n");
+        log_info( "Table created successfully");
      }
      return 0;
   }
@@ -74,12 +75,12 @@ int sqlite_insert(char *dbname,message_s *pack_info)
            rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
            if( rc != SQLITE_OK )
            {
-             fprintf(stderr, "SQL error: %s\n", zErrMsg);
+             log_error( "SQL error: %s\n", zErrMsg);
              sqlite3_free(zErrMsg);
            }
            else
            {
-             fprintf(stdout, "Table iinsert  successfully\n");
+             log_info( "Table insert  successfully");
            }
        return 0;
 
@@ -110,7 +111,7 @@ int  get_table(char *dbname,message_s *pack_info)
      }
      else
      {
-        fprintf(stdout, "Table select successfully\n");
+        log_info("Table select successfully\n");
      }
          strcpy(pack_info->name,dbResult[5]);
          pack_info->temp=atof(dbResult[6]);
@@ -120,20 +121,20 @@ int  get_table(char *dbname,message_s *pack_info)
   }
 int sqlite_delect(char *dbname)
 {
-      char sql[128] = {0};
+          char sql[128] = {0};
           int  rc = -1;
           char *zErrMsg = 0;
-    memset(sql,0,sizeof(sql));
+         memset(sql,0,sizeof(sql));
         snprintf(sql,sizeof(sql),"DELETE FROM TEMPERATURE WHERE rowid IN (SELECT rowid FROM TEMPERATURE LIMIT 1);");
         rc  = sqlite3_exec(db,sql,callback,0,&zErrMsg);
         if(rc != SQLITE_OK)
     {
-        printf("Sqlite_delete_data error:%s\n", zErrMsg);
+        log_error("Sqlite_delete_data error:%s\n", zErrMsg);
         sqlite3_free(zErrMsg);
         return -1;
     }
 
-    printf("Delete first data successfully!\n");
+    log_info("Delete first data successfully!\n");
     return 0;
 }
 int sqlite_close(void)
@@ -142,11 +143,37 @@ int sqlite_close(void)
 
     if( SQLITE_OK != sqlite3_close(db) )
     {
-        printf("Error close database: %s\n", zErrMsg );
+        log_error("Error close database: %s\n", zErrMsg );
         sqlite3_free(zErrMsg);
     }
-    printf("successfully close database\n");
+    log_info("successfully close database\n");
     return 0;
 }
 
+int database_check_data(char *dbname)
+{
+    char    sql[128];
+    int     rv;
+    char   *zErrMsg = 0;
+    char  **dbResult;
+    int     nRow=0, nColumn=0;
 
+    if((dbname == NULL) || (db == NULL))
+    {
+        log_error("The sqlite_check_data() argument incorrect!\n");
+        return -1;
+    }
+
+    memset(sql, 0, sizeof(sql));
+    sprintf(sql, "SELECT * FROM TEMPERATURE LIMIT 1;");          // 选择第一条数据
+
+    rv = sqlite3_get_table(db, sql, &dbResult, &nRow, &nColumn, &zErrMsg);
+    if (rv != SQLITE_OK)
+    {
+        log_error("Sqlite_check_data error:%s\n", zErrMsg);
+        sqlite3_free(zErrMsg);
+        return -2;
+    }
+
+    return nRow;
+}
