@@ -27,6 +27,7 @@
 #include"database.h"
 #include"packinfo.h"
 #include"logger.h"
+#include"sock_client.h"
 
 void print_usage(char *progname)
 {
@@ -56,8 +57,10 @@ int main(int argc,char **argv)
         char                  buf[1024];
         char                  buf1[128];
 		char                  buf2[128];	
-		message_s s = {"hello",20.55,"2023-4-29 12.54.36"};  
-		message_s *pack_info = &s;
+		message_s s1 = {"hello",20.55,"2023-4-29 12.54.36"}; 
+		message_s s2 = {"world",55.20,"2023-4-29 12.36.54"};
+		message_s *pack_info1 = &s1;
+		message_s *pack_info2 = &s2;
         struct option         opts[] = {
              {"ipaddr",required_argument,NULL,'i'},
              {"port",required_argument,NULL,'p'},
@@ -66,8 +69,6 @@ int main(int argc,char **argv)
              {"help",no_argument,NULL,'h'},
              {NULL,0,NULL,0}
         };
-		struct tcp_info        info;
-		int                    len = sizeof(info);
         int                    ch;
         while((ch=getopt_long(argc,argv,"i:p:d:t:h",opts,NULL))!=-1)
         {
@@ -93,11 +94,7 @@ int main(int argc,char **argv)
                    }
 
         }
-        if(logger_init("stdout",LOG_LEVEL_INFO)<0)
-             {
-                  fprintf(stderr,"initial logger system failure\n");
-                  return -1;
-             }
+
         if(logger_init("running.log",LOG_LEVEL_DEBUG)<0)
              {
                   fprintf(stderr,"initial logger system failure\n");
@@ -119,72 +116,97 @@ int main(int argc,char **argv)
              {
                  log_error("socket failure!");
              }
+        if((rv1 = sqlite_init(dbname))<0)
+	    	{
+                 log_error("database initial false!");
+				 return -6;
+		    }  
 
+         socket_connected = get_sock_state(sockfd);
 
+		if(socket_connected)
+         {
+            if((rv2 = database_check_data(dbname))>0)
+           {
+               if((rv3 = get_table(dbname,pack_info2))<0)
+				 {
+                       log_error("get database table!");
+				 }
+                 snprintf(buf2,sizeof(buf2),"%s/%f/%s\n",pack_info2->name,pack_info2->temp,pack_info2->time1);
 
+               if( reva = write(sockfd,buf2,strlen(buf2))<0);
+			   {
+                    log_error("database write to server failure!");
+			   }
+                log_info("database write to server successfully!");
+				
+               if(( rv6 = sqlite_delect(dbname))<0);
+			   {
+                    log_error("database delect failure!");
+			   }
+                log_info("DELETE sqlite database successfully!");
+
+             printf("set database data ok!\n");
+           }
+			if((rv4 = database_check_data(dbname))==0)
+            {
+              printf("database don't have data!\n");
+            }
+               sqlite_close();
+         }
  while(1)
 
  {
 
-        if((rv1=get_serialnumber(pack_info->name))<0)
+        if((rv1=get_serialnumber(pack_info1->name))<0)
         {
           log_error("get serialnumber failure!");
           return -4;
         }
-        if((rv2=get_temperature(&pack_info->temp))<0)
+        if((rv2=get_temperature(&pack_info1->temp))<0)
         {
            log_error("get temperature failure!");
            return -5;
         }
-        if((rv3=get_time(pack_info->time1))<0)
+        if((rv3=get_time(pack_info1->time1))<0)
         {
            log_error("get time failure!");
            return -6;
         }
-        snprintf(buf1,sizeof(buf1)," %s/%f/%s\n",pack_info->name,pack_info->temp,pack_info->time1);
+        snprintf(buf1,sizeof(buf1)," %s/%f/%s\n",pack_info1->name,pack_info1->temp,pack_info1->time1);
 
-		getsockopt(sockfd,IPPROTO_TCP,TCP_INFO,&info,(socklen_t*)&len);
-		if((info.tcpi_state ==1))
-		{
-            log_info("socket connected!");
-            socket_connected = 1;
-		}
-		else
-		{
-            log_warn("sockfd disconnected!");
-			socket_connected = 0;
-		}
+		socket_connected = get_sock_state(sockfd);//返回0表示断开socke,返回1表示socket连接
         signal(SIGPIPE,SIG_IGN);
 		if(socket_connected)
-		{ 
-			rv4 = sqlite_init(dbname);
-			rv5 = get_table(dbname,pack_info);
-			if(rv5<0)
-			{
-               log_error("get Table failure!");
-			}
-			snprintf(buf2,sizeof(buf2),"%s/%f/%s\n",pack_info->name,pack_info->temp,pack_info->time1);
-		    reva = write(sockfd,buf2,strlen(buf2));
-			log_info("database write to server successfully!");
-			rv6 = sqlite_delect(dbname);
-            log_info("DELETE sqlite database successfully!");
+		{  
+
             reva = write(sockfd,buf1,strlen(buf1));
 			if(reva<0)
 			{
                 log_error("write to server failure!");
 			}
+
 			log_info("socket write to server successfully! ");
-            sqlite_close();
 		}
+
 		if(!socket_connected)
 		{
+			if((rv4 = sqlite_init(dbname))<0)
+             {
+                  log_error("database initial false!");
+                  return -6;
+             }
+
 			log_warn("Breaking and write to database!");
-            rv6 = sqlite_init(dbname);
-			rv6 = sqlite_insert(dbname,pack_info);
+
+
+			rv6 = sqlite_insert(dbname,pack_info1);
+
 			if(rv6<0)
 			{
                  log_error("INSERT to database failure!");
 			}
+
 			log_info("write to database successfully!");
             sqlite_close();
 		}
@@ -193,19 +215,6 @@ int main(int argc,char **argv)
              log_error("write to server failure!");
 	    }
 	
-        reva = read(sockfd,buf,sizeof(buf));
-        if(reva<0)
-           {
-                  log_error("read data from server by sockfd[%d] failure!",sockfd);
-           }
-         else if(reva = 0)
-           {
-                  log_warn("sockfd[%d] get disconnected!",sockfd);
-           }
-         else if(reva > 0)
-           {
-             log_info("read %d bytes data from server!",reva,buf);
-           }
 
        sleep(interval_time-1);
  }
