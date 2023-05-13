@@ -16,9 +16,20 @@
 #ifndef  _SOCK_CLIENT_H_
 #define  _SOCK_CLIENT_H_
 
-int sock_init(char *servip,char *domain,int port);
 
-int get_sock_state(int sockfd);
+typedef struct socket_s
+{
+     int      fd;
+	 char     *hostname;//server hostname or ip address
+	 int      port;//server listen port
+
+}socket_t;
+
+int sock_init(socket_t *sock_info);
+
+int get_sock_state(socket_t *sock_info);
+
+int sock_connect(socket_t *sock_info);
 
 
 #endif

@@ -17,18 +17,17 @@
 #include"packinfo.h"
 
 
- int callback(void *NotUsed, int argc, char **argv, char **azColName);
+int callback(void *NotUsed, int argc, char **argv, char **azColName);
 
 int sqlite_init(char *db_name);
 
-int sqlite_insert(char *dbname,message_s *pack_info);
+int sqlite_insert(message_s pack_info);
 
-int get_table(char *dbname,message_s *pack_info);
+int get_table(char *send_buf);
 
-int sqlite_delect(char *dbname);
+int sqlite_delect(void);
 
 int sqlite_close(void);
 
-int database_check_data(char *dbname);
 
 #endif

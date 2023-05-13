@@ -104,7 +104,9 @@ int main(int argc,char **argv)
 	   continue;
 	}
         else if(0==pid)
-    {   
+    {
+		while(1)
+	{
         char         buf[1024];
 	close(sockfd);//关闭listen_fd，只用client_fd来通信
         printf("child process start to commuicate with socket client\n");
@@ -133,6 +135,7 @@ int main(int argc,char **argv)
            close(clifd);
 	   exit(0);
 	}
+}
 	sleep(1);
 	printf("close clifd socket[%d] and child process exit\n",clifd);
 	close(clifd);
